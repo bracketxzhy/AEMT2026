@@ -1,0 +1,121 @@
+{
+  "system": {
+    "population_size": 4,
+    "episode_length": 500,
+    "state_labels": [
+      "water",
+      "oxygen",
+      "energy",
+      "reliability",
+      "load"
+    ],
+    "nominal_state": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0
+    ],
+    "initial_ranges": {
+      "water": [
+        0.94,
+        1.06
+      ],
+      "oxygen": [
+        0.95,
+        1.05
+      ],
+      "energy": [
+        0.92,
+        1.08
+      ],
+      "reliability": [
+        0.95,
+        1.0
+      ],
+      "load": [
+        0.02,
+        0.08
+      ]
+    },
+    "water_consumption_rate": 0.045,
+    "oxygen_consumption_rate": 0.04,
+    "nominal_water_recycling_efficiency": 0.86,
+    "nominal_oxygen_regeneration_efficiency": 1.02,
+    "max_aux_water_support": 0.08,
+    "energy_allocation_limit": 0.04,
+    "max_recycling_intensity": 1.0,
+    "base_energy_input": 0.072,
+    "base_energy_demand": 0.045,
+    "water_support_energy_cost": 0.5,
+    "recycling_energy_cost": 0.028,
+    "reliability_energy_drain": 0.02,
+    "degradation_rate": 0.00058,
+    "degradation_action_scale": 0.75,
+    "disturbance_scale": 0.006,
+    "reliability_noise_scale": 0.00035,
+    "load_retention": 0.994,
+    "load_weights": [
+      0.18,
+      0.22,
+      0.15
+    ],
+    "safety_lower_bounds": {
+      "water": 0.72,
+      "oxygen": 0.76,
+      "energy": 0.68,
+      "reliability": 0.34
+    },
+    "critical_lower_bounds": {
+      "water": 0.62,
+      "oxygen": 0.66,
+      "energy": 0.55,
+      "reliability": 0.2
+    },
+    "load_limit": 1.5,
+    "critical_load": 1.9,
+    "state_upper_clip": 1.6
+  },
+  "reward": {
+    "survival_bonus": 1.35,
+    "ecological_load_penalty": 1.25,
+    "deviation_penalty": 0.95,
+    "action_penalty": 0.08,
+    "reliability_penalty": 0.25,
+    "safety_violation_penalty": 20.0,
+    "safety_buffer_penalty": 6.0,
+    "safety_buffer_margin": 0.08,
+    "terminal_penalty": 25.0
+  },
+  "ppo": {
+    "state_dim": 5,
+    "action_dim": 3,
+    "hidden_dim": 128,
+    "learning_rate": 0.0003,
+    "gamma": 0.99,
+    "gae_lambda": 0.95,
+    "clip_epsilon": 0.2,
+    "entropy_coef": 0.01,
+    "value_coef": 0.5,
+    "grad_clip": 0.8,
+    "batch_size": 64,
+    "rollout_episodes_per_iteration": 4,
+    "update_epochs": 10,
+    "training_iterations": 90,
+    "seed": 2026
+  },
+  "evaluation_runs": 50,
+  "robustness_runs": 40,
+  "degradation_scenarios": [
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75
+  ],
+  "trajectory_seed": 37,
+  "output_root": "D:\\Desktop\\AEMT2026\\code\\outputs",
+  "figure_dir": "D:\\Desktop\\AEMT2026\\code\\outputs\\figures",
+  "metric_dir": "D:\\Desktop\\AEMT2026\\code\\outputs\\metrics",
+  "model_dir": "D:\\Desktop\\AEMT2026\\code\\outputs\\models"
+}

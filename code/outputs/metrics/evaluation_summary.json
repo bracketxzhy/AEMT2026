@@ -1,0 +1,28 @@
+{
+  "ppo": {
+    "mean_total_reward": -4.3407190341539,
+    "mean_safe_duration": 57.22,
+    "mean_cumulative_load": 34.822242604717616,
+    "mean_average_load": 0.6120238324976748,
+    "mean_final_load": 1.526116795539856,
+    "mean_water_std": 0.04449885428785558,
+    "mean_oxygen_std": 0.03806804751614252,
+    "mean_energy_std": 0.027157195190275017,
+    "safe_completion_rate": 0.0
+  },
+  "threshold": {
+    "mean_total_reward": -22.056173514168776,
+    "mean_safe_duration": 26.32,
+    "mean_cumulative_load": 17.51003704611212,
+    "mean_average_load": 0.6673357414074935,
+    "mean_final_load": 1.539407081604004,
+    "mean_water_std": 0.03243362797517919,
+    "mean_oxygen_std": 0.034416690835510404,
+    "mean_energy_std": 0.10255080774221516,
+    "safe_completion_rate": 0.0
+  },
+  "improvement": {
+    "safe_duration_gain_pct": 117.40121580547113,
+    "average_load_reduction_pct": 8.288467929674962
+  }
+}
