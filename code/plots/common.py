@@ -22,6 +22,9 @@ COLORS = {
     "unsafe_fill": "#F5E0E0",
 }
 
+MAIN_LINEWIDTH = 2.4
+MARKER_SIZE = 6.0
+
 
 def apply_publication_style() -> None:
     plt.style.use("seaborn-v0_8-white")
@@ -29,23 +32,25 @@ def apply_publication_style() -> None:
         {
             "font.family": "STIXGeneral",
             "mathtext.fontset": "stix",
-            "figure.dpi": 160,
-            "savefig.dpi": 300,
+            "figure.dpi": 320,
+            "savefig.dpi": 1200,
             "axes.spines.top": False,
             "axes.spines.right": False,
-            "axes.linewidth": 0.9,
+            "axes.linewidth": 1.0,
             "axes.facecolor": "white",
             "figure.facecolor": "white",
-            "axes.labelsize": 10.5,
-            "axes.titlesize": 11,
-            "xtick.labelsize": 9.5,
-            "ytick.labelsize": 9.5,
-            "legend.fontsize": 9,
+            "axes.labelsize": 12.5,
+            "axes.titlesize": 13,
+            "xtick.labelsize": 11.5,
+            "ytick.labelsize": 11.5,
+            "legend.fontsize": 11,
             "grid.alpha": 0.6,
             "grid.color": COLORS["grid"],
             "grid.linewidth": 0.65,
             "lines.solid_capstyle": "round",
             "lines.solid_joinstyle": "round",
+            "text.antialiased": True,
+            "patch.antialiased": True,
         }
     )
 
@@ -53,5 +58,5 @@ def apply_publication_style() -> None:
 def finalize_figure(fig: plt.Figure, output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.tight_layout()
-    fig.savefig(output_path, bbox_inches="tight")
+    fig.savefig(output_path, bbox_inches="tight", pad_inches=0.04)
     plt.close(fig)

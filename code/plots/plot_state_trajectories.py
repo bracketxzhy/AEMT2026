@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from config import ExperimentConfig
-from plots.common import COLORS, apply_publication_style, finalize_figure
+from plots.common import COLORS, MAIN_LINEWIDTH, apply_publication_style, finalize_figure
 
 
 PANEL_TAGS = {"water": "(a)", "oxygen": "(b)", "energy": "(c)"}
@@ -35,7 +35,7 @@ def plot_state_trajectories(
 ) -> Path:
     apply_publication_style()
     xmax = _plot_window(trajectories)
-    fig, axes = plt.subplots(3, 1, figsize=(7.8, 8.0), sharex=True)
+    fig, axes = plt.subplots(3, 1, figsize=(8.6, 10.0), sharex=True)
     labels: List[Tuple[str, str, float]] = [
         ("water", "Water storage", config.system.safety_lower_bounds["water"]),
         ("oxygen", "Oxygen concentration", config.system.safety_lower_bounds["oxygen"]),
@@ -56,7 +56,7 @@ def plot_state_trajectories(
             color = COLORS[controller_name]
             label = "Adaptive PPO" if controller_name == "ppo" else "Threshold baseline"
             clipped_steps = np.arange(min(len(values), xmax + 1), dtype=np.int32)
-            line, = axis.plot(clipped_steps, values[: xmax + 1], linewidth=2.0, color=color)
+            line, = axis.plot(clipped_steps, values[: xmax + 1], linewidth=MAIN_LINEWIDTH, color=color)
             axis.scatter([term], [values[term]], color=color, s=22, zorder=5)
             axis.axvline(term, color=color, linestyle="--", linewidth=0.9, alpha=0.45)
             axis.annotate(
@@ -75,7 +75,7 @@ def plot_state_trajectories(
             legend_handles.extend([nominal, safety])
             legend_labels.extend(["Nominal level", "Safety bound"])
 
-        axis.text(0.01, 0.95, PANEL_TAGS[key], transform=axis.transAxes, ha="left", va="top", fontsize=10.5, fontweight="bold")
+        axis.text(0.01, 0.95, PANEL_TAGS[key], transform=axis.transAxes, ha="left", va="top", fontsize=11.5, fontweight="bold")
         axis.set_ylabel(ylabel)
         axis.set_ylim(0.55, 1.25)
         axis.grid(True, axis="both")
@@ -93,13 +93,13 @@ def plot_ecological_load(
 ) -> Path:
     apply_publication_style()
     xmax = _plot_window(trajectories, margin=8, hard_cap=140)
-    fig, ax = plt.subplots(figsize=(7.4, 4.0))
+    fig, ax = plt.subplots(figsize=(6.8, 6.8))
     for controller_name, rows in trajectories.items():
         steps = [row["step"] for row in rows[: xmax + 1]]
         values = [row["load"] for row in rows[: xmax + 1]]
         color = COLORS[controller_name]
         name = "Adaptive PPO" if controller_name == "ppo" else "Threshold baseline"
-        ax.plot(steps, values, linewidth=2.2, color=color, label=name)
+        ax.plot(steps, values, linewidth=MAIN_LINEWIDTH, color=color, label=name)
     ax.set_xlabel("Decision step")
     ax.set_ylabel("Ecological load")
     ax.legend(frameon=False, loc="upper left")

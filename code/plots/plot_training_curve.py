@@ -8,13 +8,13 @@ from typing import List, Mapping
 import matplotlib.pyplot as plt
 import numpy as np
 
-from plots.common import COLORS, apply_publication_style, finalize_figure
+from plots.common import COLORS, MAIN_LINEWIDTH, apply_publication_style, finalize_figure
 from utils.common import moving_average
 
 
 def plot_training_curve(history: List[Mapping[str, float]], output_path: Path) -> Path:
     apply_publication_style()
-    fig, ax = plt.subplots(figsize=(7.4, 4.2))
+    fig, ax = plt.subplots(figsize=(6.8, 6.8))
 
     iterations = np.asarray([row["iteration"] for row in history], dtype=np.float32)
     returns = np.asarray([row["mean_return"] for row in history], dtype=np.float32)
@@ -25,7 +25,7 @@ def plot_training_curve(history: List[Mapping[str, float]], output_path: Path) -
 
     ax.fill_between(iterations, smoothed - band, smoothed + band, color=COLORS["ppo_light"], alpha=0.75, linewidth=0)
     ax.plot(iterations, returns, color=COLORS["ppo_light"], linewidth=1.0, alpha=1.0)
-    ax.plot(iterations, smoothed, color=COLORS["ppo"], linewidth=2.4)
+    ax.plot(iterations, smoothed, color=COLORS["ppo"], linewidth=MAIN_LINEWIDTH)
 
     best_idx = int(np.argmax(smoothed))
     ax.scatter(iterations[best_idx], smoothed[best_idx], color=COLORS["accent"], s=30, zorder=5)

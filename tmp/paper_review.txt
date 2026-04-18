@@ -1,0 +1,407 @@
+                                                                                                                           2026-01-XXXX
+
+                                                                                                               © 2026 SAE International
+
+
+    Adaptive Regulation of Micro Closed-Loop Space Station Ecosystems Using
+                                               Proximal Policy Optimization
+
+                                                                            Heyang Zhang*,1, Meixin Wu2, Junze Xie1
+                                          1: Sichuan University - Pittsburgh Institute, 2: Sichuan University – Computer College
+
+
+
+
+Abstract                                                              constraints, ranging from mass, energy to reliability
+                                                                      [4],[5],[7],[8],[9],[10]. Different from short-term missions, long-term
+
+                                                                      space station operations could not rely on frequent external
+Long-term orbital missions require highly independent life-
+                                                                      support, but only depend on internal micro closed-loop life-
+support systems, maintaining ecological stability under limited
+                                                                      support systems to secure the environmental stability [11].
+external support and subsystem attenuation. Micro closed-loop
+                                                                      Disturbances in one subsystem may propagate through resource
+space station ecosystems integrate water recycling, oxygen
+                                                                      flows, which may cause a series of impacts across the overall
+regeneration, energy distribution, and waste processing into a
+                                                                      ecological system. Therefore, maintaining stable control of
+coupled state network. Conventional strategies are typically
+                                                                      integrated cycles is a critical challenge for long-term missions
+based on fixed threshold rules or deterministic mass-balance          [13].
+models and cannot adapt to disturbances or multi-objective
+trade-offs between resource safety and environmental load. This
+paper proposes a reinforcement learning framework for                 Traditional life-support controlling strategies are typically based
+managing micro closed-loop ecological systems under reliability       on fixed threshold control [5],[6],[7],[9]. These methods assume
+decay and environmental constraints.A reinforcement learning          predictable subsystem performance. It only respond when
+controller based on Proximal Policy Optimization (PPO) is             system variables approach predefined safety limits. However,
+trained to learn stable regulation policies with random               subsystem atentuation, random disturbances, and environmental
+disturbances. A dynamic state model is constructed to describe        fluctuations become increasingly significant during long-term
+the coupled and time-sequtential elements, ranging from water         operations [5],[9]. Therefore, deterministic control strategy model
+storage, oxygen concentration, energy reserve, subsystem              cannot effectively react to nonlinear or emergency issues
+reliability to ecological load. Degradation propagation is            between dynamics and reliability. Consequently, rule-based and
+integrated into the transition dynamics through reliability           fixed strategies may lead to inefficient resource allocation or
+recycling efficiency. Simulation experiments demonstrate that         delayed responses, casuing ecological imbalance.
+the proposed policy maintains all resource variables within the
+safety margins while reducing ecological imbalance compared           Recent advances in reinforcement learning have provided
+with traditional strategies. Consequently, the proposed               effective tools for independent decision-making in complex
+framework provides a expandable control architecture for              systems [2],[3],[4],[15]. In this study, a reinforcement learning
+independent regulation of space station life-support systems.         framework for micro closed-loop space station ecosystems is
+                                                                      developed using Proximal Policy Optimization (PPO) [1]. A
+Key word: Proximal Policy Optimization (PPO); Micro closed-           compact state-space model is constructed to represent the
+loop space station ecosystems; Sensitivity analysis                   integrated elements of water storage, oxygen concentration,
+                                                                      energy reserve, subsystem reliability, and ecological load. The
+                                                                      proposed model enables adaptive regulation policies,
+Introduction                                                          maintaining ecological stability under disturbances and
+                                                                      subsystem degradation.
+Long-term space station missions require reliable ecological
+managing systems to maintain resource cycles under strict
+
+
+
+
+Page 1 of 7
+Micro Closed-Loop Ecosystem Modeling                                       Energy Balance
+
+State Representation                                                       Energy is treated as a shared supporting resource required for
+                                                                           recycling and regulation processes. 𝑐𝑤 and 𝑐𝑟 represents the
+                                                                           energy coefficients related to water supply and recycling
+The micro closed-loop life-support system is represented by a
+                                                                           regulation, respectively [14]. 𝑢𝑟,𝑡 is considered as the recycling
+compact state vector, which captures the most essential
+resource, reliability, and environmental elements. At decision             control intensity, and 𝑔𝑡 represents the available energy input at
+step 𝑡, the system state is defined as                                     step 𝑡. The energy reserve evolves according to
+
+                   𝑥𝑡 = [𝑊𝑡 , 𝑂𝑡 , 𝐸𝑡 , 𝑅𝑡 , 𝐿𝑡 ]𝑇            (1)                       𝐸𝑡+1 = 𝐸𝑡 − 𝑐𝑤 𝑢𝑤,𝑡 − 𝑐𝑟 𝑢𝑟,𝑡 + 𝑔𝑡                      (4)
+
+𝑊𝑡 denotes the normalized water storage level, 𝑂𝑡 represents the           Stabilizing the system requires energy expenditure, and intense
+normalized oxygen concentration, 𝐸𝑡 is regarded as the available           control actions may reduce operational flexibility in the future
+energy reserve, 𝑅𝑡 denotes the overall reliability of the                  when the energy storeage is insufficient.
+integrated subsystems, and 𝐿𝑡 is the ecological load index
+associated with internal environmental stress.                             Reliability Modeling
+
+Water Resource Dynamics                                                    Long-term operation undoubtedly leads to subsystem
+                                                                           attenuation [5],[9],[12]. To capture it, the overall reliability of the
+Water balance is determined by crew consumption, recovery,                 ecological system can be modeled as
+and external supply [7],[9],[12]. 𝑃 represents the crew population
+                                                                                                        𝑁            𝑁
+size, 𝜔 is the average water consumption rate, 𝜂𝑤 (𝑅𝑡 ) is the
+recycling efficiency with the current subsystem reliability level,                               𝑅𝑡 = ∑ 𝜔𝑖 𝑟𝑖,𝑡 , ∑ 𝜔𝑖 = 1                      (5)
+and 𝑢𝑤,𝑡 denotes the assistant water supply applied at step 𝑡.                                         𝑖=1          𝑖=1
+
+The corresponding sequential state can be expressed as
+                                                                           where (𝑟𝑖,𝑡 ) is the reliability of subsystem (𝑖) at decision step
+              𝑊𝑡+1 = 𝑊𝑡 − 𝜔𝑃 + 𝜂𝑤 (𝑅𝑡 ) 𝜔𝑃 + 𝑢𝑤,𝑡                    (2)   (𝑡), (ω𝑖 ) is its weighting coefficient, and (𝑅𝑡 ) represents the
+                                                                           overall reliability of the life-support subsystems.
+The second term represents net water demand from crew
+activity. And the third term reflects the propotion of consumed                                𝑅𝑡+1 = 𝑅𝑡 − 𝛼𝑅𝑡 + 𝜖𝑡                             (6)
+water recovered from the recycling subsystem. The last term is
+introduced as a controllable input, which compensates for                  In which 𝛼 denotes the baseline attenuation rate and 𝜖𝑡
+temporary imbalance when recycling performance deteriorates.               represents random disturbances, including minor recovery
+                                                                           effects, temporary fluctuations, or rare shocks. This equation
+                                                                           provides a tiny approximation of accumulated subsystem
+Oxygen Balance
+                                                                           without introducing excessive detail.
+Oxygen evolution is modeled in a similar way as the water,
+                                                                           To reflect the influence of reliability on recycling performance,
+considering metabolic consumption and regeneration from life-
+                                                                           the water recovery efficiency is assumed to satisfy
+support system [5],[9], [12]. The oxygen update is written as
+                                                                                                  𝜂𝑤 (𝑅𝑡 ) = 𝜂𝑤0 𝑅𝑡                             (7)
+                𝑂𝑡+1 = 𝑂𝑡 − 𝜌𝑃 + 𝜂𝑜 (𝑅𝑡 ) 𝜌𝑃                  (3)
+                                                                           where 𝜂𝑤0 is the nominal recycling efficiency in ideal
+where 𝜌 is the average oxygen consumption rate,which based on
+                                                                           conditions. This relation means that degradation in subsystem
+the previous statistic and 𝜂𝑜 (𝑅𝑡 ) represents the oxygen
+                                                                           reliability directly reduces recovery effectiveness, thereby
+regeneration efficiency under the current reliability state. This
+                                                                           integrating long-term equipment condition with short-term
+equation captures the fact that oxygen recovery capacity is also
+                                                                           resource stability [5],[7].
+affected by subsystem attenuation. When reliability decreases,
+the effective regeneration rate declines, increasing the risk of
+ecological imbalance.                                                      Ecological Load Evolution
+
+                                                                           In addition to direct resource balance, the internal environmental
+                                                                           burden of the habitat must also be considered. Ecological load is
+                                                                           used here as an accumulated indicator of environmental stress
+
+
+
+
+Page 2 of 7
+caused by persistent resource and operational inefficiency. Its      These constraints are imposed on the primary resource variables
+evolution can be modeled as                                          as
+
+              𝐿𝑡+1 =                                                                      𝑊𝑡 ≥ 𝑊min
+              𝐿𝑡 + β𝑤 (𝑊𝑡 − 𝑊 ∗ )2 + β𝑜 (𝑂𝑡 − 𝑂 ∗ )2           (8)                        𝑂min ≤ 𝑂𝑡 ≤ 𝑂max                                (12)
+                                 + β𝑒 (𝐸𝑡 − 𝐸 ∗ )2                                        𝐸𝑡 ≥ 𝐸min
+
+𝑊 ∗ , 𝑂 ∗ , and 𝐸 ∗ represents the nominal target values of water,   𝑊min , 𝑂min, 𝑂max , and 𝐸min represents the minimum safety
+oxygen, and energy, respectively, and 𝛽𝑤 , 𝛽𝑜 , and 𝛽𝑒 are           bounds. Violation of these conditions indicates that the
+nonnegative weighting coefficients. This expression represents       ecological system has entered an unsafe and unstable operating
+the persistent differnce from ideal operating conditions and         region.
+allows long-term imbalance to accumulate gradually over time.
+                                                                     Reward Function
+Reinforcement Learning Formulation for
+Ecological Regulation                                                The reward function is designed to represent both ecological
+                                                                     imbalance and unsafe comnteol behavior. It is regarded as
+The life-support regulation problem is constructed as a
+                                                                                     𝑟𝑡 = −𝜆1 𝐿𝑡 − 𝜆2 Φ(𝑠𝑡 , 𝑎𝑡 )                         (13)
+reinforcement learning task for sequential decision-making
+under uncertainty [3],[4],[15]. At each decision step, the monitor
+observes the current state and determines how much regulation        The coefficient 𝜆1 controls the relative importance of long-term
+effort should be allocated to water support, energy                  ecological stability, while 𝜆2 determines the severity of
+redistribution, and recycling adjustment.                            penalties imposed on unsafe or inefficient control behavior.
+
+State Space                                                          Policy Optimization Using Proximal Policy
+                                                                     Optimization
+Specifically, the state at step 𝑡 is defined as
+                                                                     To solve the sequential ecological regulation problem defined in
+              𝑠𝑡 = 𝑥𝑡 = [𝑊𝑡 , 𝑂𝑡 , 𝐸𝑡 , 𝑅𝑡 , 𝐿𝑡 ]𝑇             (9)   the previous section, a reinforcement learning method based on
+                                                                     PPO is adopted [1]. In contrast, PPO is well suited for this setting
+Action Space                                                         because it supports continuous action spaces and provides stable
+                                                                     policy updates through a clipped objective [1].
+The regulation action is represented by a continuous control
+vector                                                               Let (πθ (𝑎𝑡 |𝑠𝑡 )) denote the PPO policy and let (𝐴̂
+                                                                                                                        𝑡 ) denote the
+                                                                     estimated advantage function at decision step (𝑡) [1],[2]. The PPO
+                   𝑎𝑡 = [𝑢𝑤,𝑡 , 𝑢𝑒,𝑡 , 𝑢𝑟,𝑡 ]𝑇               (10)    objective is written as
+
+Transition Dynamics                                                          𝐿CLIP (𝜃) =
+                                                                                           ̂𝑡 , clip(𝑟𝑡 (𝜃), 1 − 𝜖, 1 + 𝜖)𝐴
+                                                                                                                          ̂𝑡 )]           (14)
+                                                                             𝔼𝕥 [min(𝑟𝑡 (𝜃)𝐴
+Given the current state 𝑠𝑡 and control action 𝑎𝑡 , the ecological
+                                                                                          𝜋𝜃 (𝑎𝑡 ∣𝑠𝑡 )
+system evolves according to the coupled nonlinear dynamics           In which 𝑟𝑡 (𝜃) =                     is the probable ratio between the
+                                                                                         𝜋𝜃old (𝑎𝑡 ∣𝑠𝑡 )
+conditions defined previously. The corresponding transition
+equation can be written in compact form as                           updated policy and the previous policy, and 𝜖 is the clipping
+                                                                     coefficient that limits the magnitude of policy change during
+                                                                     each update. By constraining the update step in this way, PPO
+                   𝑠𝑡+1 = 𝑓(𝑠𝑡 , 𝑎𝑡 ) + 𝜉𝑡                   (11)
+                                                                     reduces the risk of destructive parameter shifts and improves
+                                                                     training stability under uncertain transitions.
+In which 𝑓(⋅) represents the deterministic component of the
+ecological dynamics and 𝜉𝑡 denotes random rare disturbances.         The reinforcement learning controller consists of a policy
+                                                                     network and a value network. Rectified Linear Unit activation is
+Safety Constraints                                                   used in the hidden layers, and the policy is optimized using the
+                                                                     Adam optimizer. Generalized Advantage Estimation is
+To ensure safe operation of the micro-closed loop ecosystem,         employed to reduce variance in the gradient update [2]. During
+the regulation process is subject to hard ecological constraints.    training, the initial ecological states are randomly sampled
+
+
+
+
+Page 3 of 7
+within admissible operating ranges, and each episode evolves          practical ecological regulation [5],[6],[7]. All simulations and PPO
+according to the stochastic transition model defined in Section       training were implemented in Python 3.10 with PyTorch 2.2 and
+3. At every decision step, the policy outputs sequential actions      CUDA 12.1 on an NVIDIA RTX 4090 GPU. Each experiment
+for accumulated water support, energy allocation, and recycling       was repeated over 50 independent runs with different random
+intensity. The resulting trajectories are then used to evaluate       seeds, and the reported results are averages over these runs.
+returns and update the policy iteratively until convergence. The
+training process converges steadily, as illustrated in Figure 1.      Resource Stability
+
+                                                                      The PPO-based policy maintained all major resource variables
+                                                                      within admissible operating ranges throughout the simulation
+                                                                      horizon. Compared with the threshold-based controller, the
+                                                                      PPO-based policy exhibited smaller fluctaion and smoother
+                                                                      recovery behavior after disturbances. As shown in Figure 2, the
+                                                                      PPO-based controller maintains smoother water, oxygen, and
+                                                                      energy trajectories than the threshold-based baseline. This
+                                                                      difference is especially evident in the water and oxygen
+                                                                      trajectories, where the baseline controller tended to react only
+                                                                      after the state approached a safety boundary, whereas the
+                                                                      learned policy adjusted regulation intensity earlier and avoided
+                                                                      large excursions from the nominal operating point. The
+                                                                      proposed policy reduced water storage variation by
+Figure 1. Training reward convergence during PPO                      approximately 42%, oxygen concentration fluctuations were
+optimization.                                                         moderately reduced, and energy variance by 25% relative to the
+                                                                      threshold-based strategy. These improvements indicate that the
+A practical configuration is to use a learning rate of 3 × 10−4, a    learned policy does not merely keep the system within hard
+discount factor of 0.99, a clipping coefficient of 0.2, and a mini-   safety limits, but also improves the smoothness of internal
+batch size of 64. The maximum number of training iterations           regulation.
+may be set to 1.0 × 105 or higher depending on convergence
+behavior.
+
+Simulation and Results
+
+Experimental Setup
+
+Simulation experiments were conducted over a horizon of 500
+decision steps in a bid to evaluate the long-term regulation
+performance of the proposed method under random degradation.
+At the beginning of each episode, the state variables were
+initialized within admissible operating ranges around the
+nominal equilibrium point, so that the system started from a
+feasible but not perfectly balanced ecological condition. During
+simulation, subsystem reliability decayed progressively
+according to the degradation model introduced in Section 2,
+while random disturbances were injected into the transition
+dynamics to represent uncertainty in recovery efficiency, energy
+availability, and environmental fluctuation [14].
+
+The PPO policy was trained using the parameter settings
+reported in the previous section. For evaluation, each
+experiment was repeated over 50 independent runs, and all
+reported results correspond to average performance across these
+                                                                       Figure 2. Resource state trajectories under adaptive policy
+runs. The baseline controller was implemented using fixed
+                                                                                         and threshold control.
+safety thresholds and rule-based corrective actions, which
+provides a natural reference because such logic is widely used in
+
+
+
+
+Page 4 of 7
+Ecological Load Suppression
+
+Beside improving short-term resource stability, the PPO-based
+policy also reduced long-term envrionmental stress. Figure 3
+shows that the ecological load grows more slowly under the
+PPO-based policy than under the threshold-based controller.
+
+Under the PPO-based reinforcement learning policy, ecological
+load accumulation was reduced by approximately 38%
+compared with the threshold-based controller. This
+improvement indicates that the PPO policy was able to
+coordinate resource recovery and energy expenditure more
+effectively over time, instead of relying on short-term corrective
+actions. In particular, the learned controller tended to suppress
+deviation earlier, which limited the cumulative growth of
+environmental burden across the episode.
+
+
+
+
+                                                                       Figure 4. System performance under different subsystem
+                                                                                          degradation rates.
+
+                                                                     Consequently, the results show that the PPO-based controller
+                                                                     improves both short-term stability and long-term ecological
+                                                                     sustainability. These findings support the use of reinforcement
+   Figure 3. Ecological load evolution under adaptive PPO
+                                                                     learning for regulation of micro closed-loop space station life-
+          regulation and threshold-based control.
+                                                                     support systems.
+
+Robustness Under Degradation
+                                                                     Discussion
+To evaluate robustness, the degradation coefficient was varied
+across multiple scenarios while keeping the control structure        In the baseline strategy, corrective actions are typically triggered
+unchanged [14]. This experiment was designed to test whether         only when one or more state variables approach predefined
+the learned policy remained effective when the system worsen         safety limits. By contrast, the proposed policy predicts the
+faster than the ideal case. The results show that the PP-based       consequence and distributes control effort more gradually.
+adaptive policy preserved stable operation over a wider              Therefor it achieves smoother trajectories and lower long-term
+degradation range than the threshold-based baseline. This trend      environmental burden [15].
+is evident in Figure 4, which compares system performance
+across multiple degradation scenarios. Even when degradation         Another important implication of the results is that subsystem
+was accelerated, the learned policy continued to allocate            reliability should not be treated as an external background
+regulation effort in a balanced manner and prevented abrupt          factor. In the framework, reliability is explicitly coupled with
+ecological collapse.                                                 recycling efficiency and ecological load evolution.
+
+An important result is that the proposed strategy extended safe      The proposed framework also has practical extensibility.
+operational duration by nearly 90% under accelerated                 Although the current model focuses on water, oxygen, energy,
+degradation.                                                         reliability, and ecological load, the same decision architecture
+                                                                     can be extended to include additional modules such as waste
+                                                                     processing, thermal regulation, or carbon dioxide control
+                                                                     [6],[9],[10].
+
+
+
+
+Page 5 of 7
+At the same time, several limitations should be acknowledged.              155:238–246, 2019,
+The current state-transition model is intentionally simplified in a        doi:https://doi.org/10.1016/j.actaastro.2018.12.010.
+bid to make policy learning tractable within a compact                [6] Fili, T., Gòdia, F., and González-Cinca, R., “Trade-off
+framework. Some physical processes, ranging from detailed                  analysis of phase separation techniques for advanced life
+subsystem latency, maintenance scheduling to nonlinear cross-              support systems in space,” Acta Astronautica 178:571–583,
+coupling between environmental variables, are not explicitly               2021, doi:https://doi.org/10.1016/j.actaastro.2020.09.052.
+modeled. In addition, the simulation study is based on synthetic      [7] Shkedi, B.D., “Lessons Learned from the International
+degradation scenarios rather than real telemetry data from                 Space Station (ISS) Environmental Control and Life
+operational life-support systems. Future work should therefore             Support System (ECLSS) Water Subsystem,” SAE
+focus on incorporating higher-loyalty subsystem models and                 International Journal of Aerospace 1(1):78–83, 2008,
+validating the control framework against engineering data or               doi:https://doi.org/10.4271/2008-01-2008.
+hardware-in-the-loop experiments [7],[8],[11].                        [8] Gentry, G.J. and Cover, J., “International Space Station
+                                                                           (ISS) Environmental Control and Life Support (ECLS)
+Conclusions                                                                System Overview of Events: February 2002 - 2004,” SAE
+                                                                           Technical Paper Series, 2004,
+                                                                           doi:https://doi.org/10.4271/2004-01-2383.
+This study developed a reinforcement learning–based adaptive          [9] Raihan, A., “Toward sustainable living in space: A review
+regulation framework for micro closed-loop space station                   of environmental control and life support system
+ecosystems using Proximal Policy Optimization. A compact                   technologies,” Space Habitation 2(1):100047, 2026,
+state-space model was constructed to represent the integrated              doi:https://doi.org/10.1016/j.spaceh.2025.100047.
+evolution of water storage, oxygen concentration, energy              [10] Reuter, J.L., “International Space Station Environmental
+reserve, subsystem reliability, and ecological load.                       Control and Life Support System Status: 1997-1998,” SAE
+                                                                           Technical Papers on CD-ROM/SAE Technical Paper
+Simulation results showed that the learned policy maintained the           Series, 1998, doi:https://doi.org/10.4271/981662.
+main resource variables within admissible operating ranges            [11] Williams, D.E., Lewis, J.F., Carrasquillo, R.L., Reysa,
+while improving both short-term stability and long-term                    R.P., and Gentry, G., “International Space Station
+sustainability relative to threshold-based regulation.                     Environmental Control And Life Support System Status:
+                                                                           2001-2002,” SAE Technical Paper Series, 2002,
+Further improvements should focus on integrating higher-                   doi:https://doi.org/10.4271/2002-01-2494.
+fidelity subsystem dynamics, richer disturbance models, and           [12] Reysa, R., Van Keuren, S., Philistine, C., and Link, D.
+engineering validation with realistic operational data [13].               “Chip”, “Integrated Status of Regenerative Environmental
+                                                                           Control and Life Support System (ECLSS) Functions into
+References                                                                 the International Space Station (ISS) U.S. Laboratory
+                                                                           Element,” SAE Technical Paper Series 1, 2006,
+                                                                           doi:https://doi.org/10.4271/2006-01-2058.
+[1] Schulman, J., Wolski, F., Dhariwal, P., Radford, A., and          [13] Weppler, J., “Contributions of the International Space
+    Klimov, O., “Proximal Policy Optimization Algorithms,”                 Station towards future exploration missions,” Acta
+    http://arxiv.org/abs/1707.06347, 2017,                                 Astronautica 104(2):552–557, 2014,
+    doi:https://doi.org/10.48550/arXiv.1707.06347.                         doi:https://doi.org/10.1016/j.actaastro.2014.06.021.
+[2] John, S., Moritz, P., Levine, S., Jordan, M.I., and Pieter        [14] Liping, P., Guoxiang, L., Hongquan, Q., and Yufeng, F.,
+    Abbeel, “High-Dimensional Continuous Control Using                     “Flexible operation strategy for environment control
+    Generalized Advantage Estimation,” ArXiv (Cornell                      system in abnormal supply power condition,” Acta
+    University), 2015,                                                     Astronautica 133:334–345, 2017,
+    doi:https://doi.org/10.48550/arxiv.1506.02438.                         doi:https://doi.org/10.1016/j.actaastro.2016.10.037.
+[3] Sutton, R.S. and Barto, A., “Reinforcement learning: An           [15] Wilson, C. and Riccardi, A., “Enabling intelligent onboard
+    introduction,” 2nd ed., The Mit Press, Cambridge, Ma ;                 guidance, navigation, and control using reinforcement
+    London, ISBN 9780262039246, 2018.                                      learning on near-term flight hardware,” Acta Astronautica
+[4] Pouria Razzaghi, Amin Tabrizian, Guo, W., Chen, S.,                    199:374–385, 2022,
+    Taye, A., Thompson, E., Bregeon, A., Baheri, A., and Wei,              doi:https://doi.org/10.1016/j.actaastro.2022.07.013.
+    P., “A survey on reinforcement learning in aviation
+    applications,” Engineering Applications of Artificial
+    Intelligence 136:108911–108911, 2024,                             Declaration of AI-Assisted Technologies
+    doi:https://doi.org/10.1016/j.engappai.2024.108911.
+[5] Sharma, G. and Rai, R.N., “Reliability modeling and               During the preparation of this manuscript, AI-assisted tools were
+    analysis of environmental control and life support systems        used only for grammar checking and language refinement. All
+    of space stations: A literature survey,” Acta Astronautica        modeling, algorithm design, simulation development, result
+
+
+
+
+Page 6 of 7
+interpretation, and scientific conclusions were independently              Coauthor: Meixin Wu
+completed and verified by the authors. The authors take full               Sichuan University, College of Computer Science, Chengdu,
+responsibility for the integrity and originality of the content.           China
+                                                                           Email: meixin_wu@stu.scu.edu.cn
+Contact Information
+                                                                           Coauthor: Junze Xie
+                                                                           Sichuan University – Pittsburgh Institute, Chengdu, China
+Corresponding author: Heyang Zhang
+                                                                           Email: xiejunze@stu.scu.edu.cn
+Sichuan University – Pittsburgh Institute, Chengdu, China
+Email: zhangheyang1@stu.scu.edu.cn
+
+
+
+_______________________________________________________________________________________________________________
+
+© 20XX SAE International. All rights reserved. No part of this publication may be reproduced, stored in a retrieval system, transmitted, in
+any form or by any means, electronic, mechanical, photocopying, recording, or otherwise, or used for text and data mining, AI training, or
+similar technologies, without the prior written permission of SAE. Positions and opinions advanced in this work are those of the author(s)
+and not necessarily those of SAE International. Responsibility for the content of the work lies solely with the author(s).
+
+Paper presented at 2026 2nd International Conference on Aerospace Engineering and Materials Technology, Xi’an, Shaanxi, April 10-12,
+2026.
+
+ISSN 0148-7191
+
+
+
+
+Page 7 of 7
+
